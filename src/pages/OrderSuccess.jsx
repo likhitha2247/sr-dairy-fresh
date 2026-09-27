@@ -1,0 +1,15 @@
+import { useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import { Check, PackageCheck, ShoppingBag, Truck } from 'lucide-react'
+import { supabase } from '../lib/supabase.js'
+
+export default function OrderSuccess() {
+  const { id } = useParams(); const [order,setOrder]=useState(null); const [loading,setLoading]=useState(true); const [error,setError]=useState('')
+  useEffect(()=>{ (async()=>{ const {data,error:queryError}=await supabase.from('orders').select('*').eq('id',id).maybeSingle(); if(queryError)setError(queryError.message); else setOrder(data); setLoading(false) })() },[id])
+  if(loading) return <div className="container-page py-20 text-center text-sm text-ink/55">Loading your order…</div>
+  if(error || !order) return <div className="container-page py-20 text-center"><h1 className="font-display text-3xl">Order not found</h1><p className="mt-2 text-sm text-ink/55">We couldn't load this order.</p><Link to="/orders" className="btn-primary mt-6">View My Orders</Link></div>
+  const customer=order.customer || {}
+  const payment=order.payment_method==='cod'?'Cash on Delivery':order.payment_status==='paid'?'Paid online':'Online payment pending'
+  return <div className="container-page py-14 sm:py-20"><div className="mx-auto max-w-2xl text-center"><div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-sage-light text-sage"><Check size={38} strokeWidth={2.5}/></div><p className="mt-7 text-sm font-semibold uppercase tracking-[0.2em] text-sage">{order.status==='awaiting_payment'?'Order created':'Order confirmed'}</p><h1 className="mt-2 font-display text-4xl font-medium text-ink sm:text-5xl">Freshness is on its way!</h1><p className="mx-auto mt-4 max-w-lg text-ink/60">Thank you, {customer.name}. Your order is safely stored in your account.</p><div className="mt-8 grid gap-3 sm:grid-cols-3"><Info icon={<PackageCheck size={18}/>} label="Order" value={`#${order.id.slice(0,8).toUpperCase()}`}/><Info icon={<ShoppingBag size={18}/>} label="Total" value={`₹${order.total}`}/><Info icon={<Truck size={18}/>} label="Payment" value={payment}/></div><div className="mt-8 rounded-3xl border border-ink/10 bg-cream/55 p-6 text-left"><p className="text-xs font-bold uppercase tracking-wider text-ink/45">Delivery details</p><p className="mt-2 font-semibold text-ink">{customer.slot}</p><p className="mt-1 text-sm leading-6 text-ink/60">{customer.address}, {customer.landmark?`${customer.landmark}, `:''}{customer.city}, {customer.state} — {customer.pincode}</p></div><div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row"><Link to="/orders" className="btn-primary">Track Order</Link><Link to="/shop" className="btn-secondary">Continue Shopping</Link></div></div></div>
+}
+function Info({icon,label,value}){return <div className="rounded-2xl border border-ink/10 bg-milk p-4 text-center"><div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-sage-light text-sage">{icon}</div><p className="mt-2 text-xs text-ink/45">{label}</p><p className="mt-0.5 text-sm font-bold text-ink">{value}</p></div>}

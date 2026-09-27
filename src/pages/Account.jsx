@@ -1,0 +1,10 @@
+import { Link, useNavigate } from 'react-router-dom'
+import { LogOut, Package, ShieldCheck, UserRound } from 'lucide-react'
+import { useAuth } from '../context/AuthContext.jsx'
+
+export default function Account() {
+  const { user, profile, signOut, isAdmin } = useAuth()
+  const navigate = useNavigate()
+  async function logout() { await signOut(); navigate('/') }
+  return <div className="container-page py-10 sm:py-14"><div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="text-sm font-semibold uppercase tracking-[0.18em] text-sage">Your account</p><h1 className="mt-2 font-display text-3xl text-ink sm:text-4xl">Hello, {profile?.name || user?.email?.split('@')[0] || 'there'}.</h1><p className="mt-2 text-ink/55">Manage your orders and account details.</p></div><button onClick={logout} className="btn-secondary"><LogOut size={16} /> Sign out</button></div><div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"><Link to="/orders" className="group rounded-3xl border border-ink/10 bg-milk p-6 hover:border-sage"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sage-light text-sage"><Package size={21} /></div><h2 className="mt-5 font-display text-2xl text-ink">My orders</h2><p className="mt-2 text-sm text-ink/55">Track live delivery status and payment details.</p></Link><div className="rounded-3xl border border-ink/10 bg-milk p-6"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cream text-ink"><UserRound size={21} /></div><h2 className="mt-5 font-display text-2xl text-ink">Profile</h2><p className="mt-2 text-sm text-ink/55">{user?.email}</p><p className="mt-1 text-sm text-ink/55">{profile?.phone || 'Phone not added'}</p></div>{isAdmin && <Link to="/admin" className="rounded-3xl border border-ink/10 bg-sage p-6 text-milk hover:bg-sage-dark"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15"><ShieldCheck size={21} /></div><h2 className="mt-5 font-display text-2xl">Admin dashboard</h2><p className="mt-2 text-sm text-milk/75">Manage orders and delivery status.</p></Link>}</div></div>
+}
